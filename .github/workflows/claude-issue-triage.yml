@@ -50,7 +50,10 @@ jobs:
                  area:game-logic, area:ui, area:rendering, area:controls, area:scoring,
                  needs-info
 
-            4. Publica UN comentario con esta plantilla exacta:
+            4. Publica UN comentario con esta plantilla exacta.
+               El cuerpo del comentario DEBE estar escrito en GitHub Flavored Markdown (GFM)
+               para que GitHub lo renderice correctamente: usa `##`/`###` para encabezados,
+               listas con `-`, bloques de código con backticks, y cursiva con `_texto_`.
 
                ## Diagnóstico automático (Claude)
 
@@ -70,7 +73,8 @@ jobs:
                ---
                _Triage automatizado. Un mantenedor revisará y confirmará._
 
-               Comando:
+               Guarda el contenido anterior en un archivo temporal (p. ej. `/tmp/comment.md`)
+               respetando el formato GFM y luego ejecuta:
                gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file <archivo>
 
             5. Aplica labels:
