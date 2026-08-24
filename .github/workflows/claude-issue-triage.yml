@@ -1,0 +1,87 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    # Loop prevention:
+    # - Ignora issues creados por bots.
+    # - En 'edited' solo re-ejecuta si el editor es el autor original.
+    if: |
+      github.event.issue.user.type != 'Bot' &&
+      (github.event.action == 'opened' ||
+       (github.event.action == 'edited' &&
+        github.event.sender.login == github.event.issue.user.login))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          # Reutiliza el mismo secreto ya configurado en el repo para claude.yml y claude-code-review.yml.
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowed-tools "Read,Grep,Glob,Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh label list:*)"'
+          prompt: |
+            Eres un asistente de triage para ${{ github.repository }} (juego Tetris estático).
+            Analiza el issue #${{ github.event.issue.number }} y responde EN ESPAÑOL.
+
+            Pasos obligatorios en orden:
+
+            1. Lee `game.js` y `CLAUDE.md` para entender el código. Usa Grep para localizar
+               funciones relevantes (collide, tryRotate, clearLines, ghostY, lockPiece, etc.).
+
+            2. Obtén el issue:
+               gh issue view ${{ github.event.issue.number }} --repo ${{ github.repository }} --json title,body,labels
+
+            3. Lista labels disponibles:
+               gh label list --repo ${{ github.repository }} --limit 100
+               Usa SOLO labels que existan. Taxonomía esperada:
+                 bug, enhancement, question, documentation,
+                 priority:high, priority:medium, priority:low,
+                 area:game-logic, area:ui, area:rendering, area:controls, area:scoring,
+                 needs-info
+
+            4. Publica UN comentario con esta plantilla exacta:
+
+               ## Diagnóstico automático (Claude)
+
+               ### Resumen del problema
+               <2-3 frases>
+
+               ### Causa probable
+               <hipótesis técnica basada en game.js>
+
+               ### Archivos / funciones sospechosas
+               - `game.js:<línea>` — `<función>`: <por qué>
+
+               ### Pasos sugeridos para la solución
+               1. ...
+               2. ...
+
+               ---
+               _Triage automatizado. Un mantenedor revisará y confirmará._
+
+               Comando:
+               gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file <archivo>
+
+            5. Aplica labels:
+               gh issue edit ${{ github.event.issue.number }} --repo ${{ github.repository }} --add-label "l1,l2"
+
+               Reglas:
+               - Exactamente UNA de {bug, enhancement, question, documentation}.
+               - Exactamente UNA de {priority:high, priority:medium, priority:low}.
+               - Al menos UNA area:* si aplica.
+               - `needs-info` si falta información para reproducir.
+
+            6. NO edites el título ni el cuerpo del issue.
+
+            Si un label no existe en la lista del paso 3, omítelo silenciosamente.

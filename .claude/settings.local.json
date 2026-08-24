@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\\\Users\\\\jafig\\\\Desktop\\\\DevTalles\\\\ClaudeCode\\\\03-claude-tetris\" -Recurse)"
+    ]
+  }
+}
