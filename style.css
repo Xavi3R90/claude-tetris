@@ -257,3 +257,117 @@ kbd {
 #restart-btn:hover {
   background: var(--accent-hover);
 }
+
+/* ---- High scores ---- */
+.hs-qualify-msg {
+  font-size: 13px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.hs-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+#hs-name-input {
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: var(--text);
+  width: 130px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+#hs-name-input:focus {
+  border-color: var(--accent);
+}
+
+#hs-submit-btn {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#hs-submit-btn:hover {
+  background: var(--accent-hover);
+}
+
+.hs-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  width: 100%;
+  min-width: 220px;
+}
+
+.hs-table th {
+  color: var(--label);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hs-table td {
+  padding: 4px 8px;
+  color: var(--text);
+  text-align: center;
+}
+
+.hs-table tbody tr:hover {
+  background: rgba(122, 162, 247, 0.07);
+}
+
+.hs-current td {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.hs-empty {
+  font-size: 12px;
+  color: var(--label);
+  text-align: center;
+}
+
+.hs-stats {
+  font-size: 11px;
+  color: var(--controls-text);
+  margin-bottom: 4px;
+}
+
+.hs-stats strong {
+  color: var(--accent);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--label);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.btn-secondary:hover {
+  color: var(--text);
+  border-color: var(--text);
+}
+
+.hidden {
+  display: none;
+}
