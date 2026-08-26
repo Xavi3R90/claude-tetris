@@ -56,7 +56,17 @@
       <div class="overlay-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
+        <div id="hs-name-form" class="hidden">
+          <p class="hs-qualify-msg">¡Nueva puntuación en el top 5!</p>
+          <div class="hs-input-row">
+            <input type="text" id="hs-name-input" maxlength="16" placeholder="Tu nombre" autocomplete="off" />
+            <button id="hs-submit-btn">Guardar</button>
+          </div>
+        </div>
+        <div id="hs-stats" class="hidden"></div>
+        <div id="hs-table" class="hidden"></div>
         <button id="restart-btn">Reiniciar</button>
+        <button id="reset-records-btn" class="hidden btn-secondary">Restablecer récords</button>
       </div>
     </div>
   </div>
