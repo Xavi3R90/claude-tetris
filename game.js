@@ -41,7 +41,19 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeSwitch = document.getElementById('theme-switch');
 
+const viewGameover = document.getElementById('view-gameover');
+const viewPause = document.getElementById('view-pause');
+const viewControls = document.getElementById('view-controls');
+const btnResume = document.getElementById('btn-resume');
+const btnRestart = document.getElementById('btn-restart');
+const btnControls = document.getElementById('btn-controls');
+const btnBack = document.getElementById('btn-back');
+const startLevelInput = document.getElementById('start-level-input');
+
 const THEME_KEY = 'tetris-theme';
+const START_LEVEL_KEY = 'tetris-start-level';
+
+let overlayState = 'hidden';
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 let gridColor = '#22222e';
@@ -241,25 +253,47 @@ function drawNext() {
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
 
+function showOverlay(state) {
+  overlayState = state;
+  viewGameover.classList.add('hidden');
+  viewPause.classList.add('hidden');
+  viewControls.classList.add('hidden');
+
+  if (state === 'game-over') {
+    viewGameover.classList.remove('hidden');
+  } else if (state === 'pause-menu') {
+    viewPause.classList.remove('hidden');
+  } else if (state === 'controls') {
+    viewControls.classList.remove('hidden');
+  }
+
+  overlay.classList.remove('hidden');
+}
+
+function hideOverlay() {
+  overlayState = 'hidden';
+  overlay.classList.add('hidden');
+}
+
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
-  overlay.classList.remove('hidden');
+  showOverlay('game-over');
 }
 
 function togglePause() {
   if (gameOver) return;
-  paused = !paused;
-  if (!paused) {
+  if (paused) {
+    paused = false;
+    hideOverlay();
     lastTime = performance.now();
     loop(lastTime);
   } else {
+    paused = true;
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showOverlay('pause-menu');
   }
 }
 
@@ -280,26 +314,34 @@ function loop(ts) {
 }
 
 function init() {
+  const startLevel = clampLevel(parseInt(localStorage.getItem(START_LEVEL_KEY) || '1', 10));
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = Math.max(100, 1000 - (level - 1) * 90);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
-  overlay.classList.add('hidden');
+  hideOverlay();
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
-  if (paused || gameOver) return;
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (overlayState === 'controls') {
+      showOverlay('pause-menu');
+    } else {
+      togglePause();
+    }
+    return;
+  }
+  if (overlayState !== 'hidden') return;
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -322,7 +364,26 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
+function clampLevel(n) {
+  return Math.min(10, Math.max(1, n || 1));
+}
+
 restartBtn.addEventListener('click', init);
+btnResume.addEventListener('click', () => togglePause());
+btnRestart.addEventListener('click', init);
+btnControls.addEventListener('click', () => showOverlay('controls'));
+btnBack.addEventListener('click', () => showOverlay('pause-menu'));
+
+startLevelInput.addEventListener('change', () => {
+  const val = clampLevel(parseInt(startLevelInput.value, 10));
+  startLevelInput.value = val;
+  localStorage.setItem(START_LEVEL_KEY, String(val));
+});
+
+function initStartLevelInput() {
+  startLevelInput.value = clampLevel(parseInt(localStorage.getItem(START_LEVEL_KEY) || '1', 10));
+}
 
 initTheme();
+initStartLevelInput();
 init();
